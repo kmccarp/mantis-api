@@ -86,7 +86,7 @@ public class CrossRegionHandler extends SimpleChannelInboundHandler<FullHttpRequ
     private final ConnectionBroker connectionBroker;
     private final Scheduler scheduler;
 
-    private Subscription subscription = null;
+    private Subscription subscription;
     private final DynamicIntProperty queueCapacity = new DynamicIntProperty("io.mantisrx.api.push.queueCapacity", 1000);
     private final DynamicIntProperty writeIntervalMillis = new DynamicIntProperty("io.mantisrx.api.push.writeIntervalMillis", 50);
 	private final DynamicStringProperty tunnelRegionsProperty = new DynamicStringProperty("io.mantisrx.api.tunnel.regions", Util.getLocalRegion());
@@ -188,15 +188,16 @@ public class CrossRegionHandler extends SimpleChannelInboundHandler<FullHttpRequ
                             })
                             .map(data -> {
                                 final Throwable t = ref.get();
-                                if (t != null)
+                                if (t != null) {
                                     throw new RuntimeException(t);
+                                }
                                 return data;
                             })
                             .retryWhen(Util.getRetryFunc(log, uri + " in " + region))
                             .take(1)
                             .onErrorReturn(t -> new RegionData(region, false, t.getMessage(), 0));
                 })
-                .reduce(new ArrayList<RegionData>(3), (regionDatas, regionData) -> {
+                .reduce(new ArrayList<>(3), (regionDatas, regionData) -> {
                     regionDatas.add(regionData);
                     return regionDatas;
                 })
@@ -239,15 +240,16 @@ public class CrossRegionHandler extends SimpleChannelInboundHandler<FullHttpRequ
                                     }))
                             .map(data -> {
                                 final Throwable t = ref.get();
-                                if (t != null)
+                                if (t != null) {
                                     throw new RuntimeException(t);
+                                }
                                 return data;
                             })
                             .retryWhen(Util.getRetryFunc(log, uri + " in " + region))
                             .take(1)
                             .onErrorReturn(t -> new RegionData(region, false, t.getMessage(), 0));
                 })
-                .reduce(new ArrayList<RegionData>(), (regionDatas, regionData) -> {
+                .reduce(new ArrayList<>(), (regionDatas, regionData) -> {
                     regionDatas.add(regionData);
                     return regionDatas;
                 })
@@ -286,7 +288,7 @@ public class CrossRegionHandler extends SimpleChannelInboundHandler<FullHttpRequ
         Counter numMessagesCounter = SpectatorUtils.newCounter(Constants.numMessagesCounterName, pcd.target, tags);
         Counter numBytesCounter = SpectatorUtils.newCounter(Constants.numBytesCounterName, pcd.target, tags);
 
-        BlockingQueue<String> queue = new LinkedBlockingQueue<String>(queueCapacity.get());
+        BlockingQueue<String> queue = new LinkedBlockingQueue<>(queueCapacity.get());
 
         subscription = connectionBroker.connect(pcd)
                 .filter(event -> !event.equalsIgnoreCase(TunnelPingMessage) || sendThroughTunnelPings)
@@ -404,9 +406,9 @@ public class CrossRegionHandler extends SimpleChannelInboundHandler<FullHttpRequ
         StringBuilder sb = new StringBuilder("[");
         boolean first = true;
         for (RegionData data : dataList) {
-            if (first)
+            if (first) {
                 first = false;
-            else {
+            } else {
                 sb.append(",");
             }
             if (data.isSuccess()) {
@@ -420,9 +422,9 @@ public class CrossRegionHandler extends SimpleChannelInboundHandler<FullHttpRequ
         return sb.toString();
     }
 
-    private final static String regKey = "mantis.meta.origin";
-    private final static String errKey = "mantis.meta.errorString";
-    private final static String codeKey = "mantis.meta.origin.response.code";
+    private static final String regKey = "mantis.meta.origin";
+    private static final String errKey = "mantis.meta.errorString";
+    private static final String codeKey = "mantis.meta.origin.response.code";
 
     public static String getWrappedJson(String data, String region, String err) {
         return getWrappedJsonIntl(data, region, err, 0, false);
@@ -436,33 +438,41 @@ public class CrossRegionHandler extends SimpleChannelInboundHandler<FullHttpRequ
         try {
             JSONObject o = new JSONObject(data);
             o.put(regKey, region);
-            if (err != null && !err.isEmpty())
+            if (err != null && !err.isEmpty()) {
                 o.put(errKey, err);
-            if (code > 0)
+            }
+            if (code > 0) {
                 o.put(codeKey, "" + code);
+            }
             return o.toString();
         } catch (JSONException e) {
             try {
                 JSONArray a = new JSONArray(data);
-                if (!forceJson)
+                if (!forceJson) {
                     return data;
+                }
                 JSONObject o = new JSONObject();
                 o.put(regKey, region);
-                if (err != null && !err.isEmpty())
+                if (err != null && !err.isEmpty()) {
                     o.put(errKey, err);
-                if (code > 0)
+                }
+                if (code > 0) {
                     o.put(codeKey, "" + code);
+                }
                 o.accumulate("response", a);
                 return o.toString();
             } catch (JSONException ae) {
-                if (!forceJson)
+                if (!forceJson) {
                     return data;
+                }
                 JSONObject o = new JSONObject();
                 o.put(regKey, region);
-                if (err != null && !err.isEmpty())
+                if (err != null && !err.isEmpty()) {
                     o.put(errKey, err);
-                if (code > 0)
+                }
+                if (code > 0) {
                     o.put(codeKey, "" + code);
+                }
                 o.put("response", data);
                 return o.toString();
             }
