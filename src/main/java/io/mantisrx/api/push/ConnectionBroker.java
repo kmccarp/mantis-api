@@ -27,8 +27,6 @@ import mantis.io.reactivex.netty.protocol.http.sse.ServerSentEvent;
 import rx.Observable;
 import rx.Observer;
 import rx.Scheduler;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
 
 import java.util.List;
 import java.util.Map;
@@ -228,10 +226,11 @@ public class ConnectionBroker {
                                     if (!remoteResponse.getStatus().reasonPhrase().equals("OK")) {
                                         log.warn("Unexpected response from remote sink for uri {} region {}: {}", uri, region, remoteResponse.getStatus().reasonPhrase());
                                         String err = remoteResponse.getHeaders().get(Constants.metaErrorMsgHeader);
-                                        if (err == null || err.isEmpty())
+                                        if (err == null || err.isEmpty()) {
                                             err = remoteResponse.getStatus().reasonPhrase();
+                                        }
                                         return Observable.<MantisServerSentEvent>error(new Exception(err))
-                                                .map(datum -> datum.getEventAsString());
+                                                .map(MantisServerSentEvent::getEventAsString);
                                     }
                                     return clientResponseToObservable(remoteResponse, target, region, uri)
                                             .map(datum -> datum.replaceFirst("^\\{", originReplacement))
@@ -288,15 +287,12 @@ public class ConnectionBroker {
         SinkParameters metricNamesFilter = details.getSinkparameters();
 
         final MetricsClient<MantisServerSentEvent> metricsClient = workerMetricsClient.getMetricsClientByJobId(jobId,
-                new SseWorkerConnectionFunction(true, new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        log.error("Metric connection error: " + throwable.getMessage());
-                        try {
-                            Thread.sleep(500);
-                        } catch (InterruptedException ie) {
-                            log.error("Interrupted waiting for retrying connection");
-                        }
+                new SseWorkerConnectionFunction(true, throwable -> {
+                    log.error("Metric connection error: " + throwable.getMessage());
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException ie) {
+                        log.error("Interrupted waiting for retrying connection");
                     }
                 }, metricNamesFilter),
                 new Observer<WorkerConnectionsStatus>() {
