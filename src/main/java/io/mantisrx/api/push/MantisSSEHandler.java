@@ -91,7 +91,7 @@ public class MantisSSEHandler extends SimpleChannelInboundHandler<FullHttpReques
             Counter numMessagesCounter = SpectatorUtils.newCounter(Constants.numMessagesCounterName, pcd.target, tags);
             Counter numBytesCounter = SpectatorUtils.newCounter(Constants.numBytesCounterName, pcd.target, tags);
 
-            BlockingQueue<String> queue = new LinkedBlockingQueue<String>(queueCapacity.get());
+            BlockingQueue<String> queue = new LinkedBlockingQueue<>(queueCapacity.get());
 
             this.subscription = this.connectionBroker.connect(pcd)
                     .mergeWith(tunnelPingsEnabled
@@ -136,10 +136,10 @@ public class MantisSSEHandler extends SimpleChannelInboundHandler<FullHttpReques
 
     private boolean isTunnelPingsEnabled(String uri) {
         QueryStringDecoder queryStringDecoder = new QueryStringDecoder(uri);
-        return queryStringDecoder.parameters()
+        return "true"
+                .equalsIgnoreCase(queryStringDecoder.parameters()
                 .getOrDefault(Constants.TunnelPingParamName, Arrays.asList("false"))
-                .get(0)
-                .equalsIgnoreCase("true");
+                .get(0));
     }
 
     private boolean isWebsocketUpgrade(HttpRequest request) {
@@ -149,7 +149,7 @@ public class MantisSSEHandler extends SimpleChannelInboundHandler<FullHttpReques
         String connection = headers.get(HttpHeaderNames.CONNECTION);
         String upgrade = headers.get(HttpHeaderNames.UPGRADE);
         return connection != null && connection.toLowerCase().contains("upgrade") &&
-                upgrade != null && upgrade.toLowerCase().equals("websocket");
+                upgrade != null && "websocket".equals(upgrade.toLowerCase());
     }
 
 
@@ -187,11 +187,11 @@ public class MantisSSEHandler extends SimpleChannelInboundHandler<FullHttpReques
     }
 
     public String jobSubmit(FullHttpRequest request) {
-        final String API_JOB_SUBMIT_PATH = "/api/submit";
+        final String apiJobSubmitPath = "/api/submit";
 
         String content = request.content().toString(StandardCharsets.UTF_8);
-        return callPostOnMaster(highAvailabilityServices.getMasterMonitor().getMasterObservable(), API_JOB_SUBMIT_PATH, content)
-                .retryWhen(Util.getRetryFunc(log, API_JOB_SUBMIT_PATH))
+        return callPostOnMaster(highAvailabilityServices.getMasterMonitor().getMasterObservable(), apiJobSubmitPath, content)
+                .retryWhen(Util.getRetryFunc(log, apiJobSubmitPath))
                 .flatMap(masterResponse -> masterResponse.getByteBuf()
                         .take(1)
                         .map(byteBuf -> {

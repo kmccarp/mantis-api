@@ -52,7 +52,7 @@ public class Util {
     }
 
     public static boolean isAllRegion(String region) {
-        return region != null && region.trim().equalsIgnoreCase("all");
+        return region != null && "all".equalsIgnoreCase(region.trim());
     }
 
     //
