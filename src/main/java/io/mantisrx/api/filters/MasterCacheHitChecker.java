@@ -68,7 +68,7 @@ public class MasterCacheHitChecker extends HttpInboundSyncFilter {
     public boolean shouldFilter(HttpRequestMessage msg) {
         String key = msg.getPathAndQuery();
 
-        return msg.getMethod().equalsIgnoreCase("get")
+        return "get".equalsIgnoreCase(msg.getMethod())
                 && key.startsWith("/api")
                 && !Util.startsWithAnyOf(key, pushPrefixes);
     }
