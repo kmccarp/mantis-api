@@ -96,8 +96,6 @@ public class MantisApiServerChannelInitializer extends BaseZuulChannelInitialize
     }
 
 
-
-
     @Override
     protected void initChannel(Channel ch) throws Exception
     {
@@ -176,7 +174,7 @@ public class MantisApiServerChannelInitializer extends BaseZuulChannelInitialize
 
                 if (Util.startsWithAnyOf(uri, this.pushPrefixes)) {
                     addPushHandlers(pipeline, uri);
-                } else if(uri.startsWith("/region/")) {
+                } else if (uri.startsWith("/region/")) {
                     addRegionalHandlers(pipeline);
                 } else {
                     addZuulHandlers(pipeline);

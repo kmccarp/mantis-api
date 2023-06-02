@@ -40,9 +40,9 @@ public class AppStreamDiscoveryService {
     private final AppStreamStore appStreamStore;
 
     public AppStreamDiscoveryService(
-        MantisClient mantisClient,
-        Scheduler scheduler,
-        AppStreamStore appStreamStore) {
+            MantisClient mantisClient,
+            Scheduler scheduler,
+            AppStreamStore appStreamStore) {
         Preconditions.checkArgument(mantisClient != null);
         Preconditions.checkArgument(appStreamStore != null);
         Preconditions.checkArgument(scheduler != null);
@@ -51,11 +51,11 @@ public class AppStreamDiscoveryService {
         this.appStreamStore = appStreamStore;
 
         Counter appJobClusterMappingNullCount = SpectatorUtils.newCounter(
-            "appJobClusterMappingNull", "mantisapi");
+                "appJobClusterMappingNull", "mantisapi");
         Counter appJobClusterMappingRequestCount = SpectatorUtils.newCounter(
-            "appJobClusterMappingRequest", "mantisapi", "app", "unknown");
+                "appJobClusterMappingRequest", "mantisapi", "app", "unknown");
         Counter appJobClusterMappingFailCount = SpectatorUtils.newCounter(
-            "appJobClusterMappingFail", "mantisapi");
+                "appJobClusterMappingFail", "mantisapi");
     }
 
 
@@ -87,7 +87,7 @@ public class AppStreamDiscoveryService {
         }
     }
 
-    public AppJobClustersMap getAppJobClustersMap(List<String> appNames) throws IOException  {
+    public AppJobClustersMap getAppJobClustersMap(List<String> appNames) throws IOException {
         return appStreamStore.getJobClusterMappings(appNames);
     }
 

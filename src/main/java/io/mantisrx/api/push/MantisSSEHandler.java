@@ -53,7 +53,7 @@ public class MantisSSEHandler extends SimpleChannelInboundHandler<FullHttpReques
     private String uri;
 
     public MantisSSEHandler(ConnectionBroker connectionBroker, HighAvailabilityServices highAvailabilityServices,
-                            List<String> pushPrefixes) {
+            List<String> pushPrefixes) {
         super(true);
         this.connectionBroker = connectionBroker;
         this.highAvailabilityServices = highAvailabilityServices;
@@ -129,15 +129,15 @@ public class MantisSSEHandler extends SimpleChannelInboundHandler<FullHttpReques
                             : Observable.empty())
                     .doOnNext(event -> {
                         if (!Constants.DUMMY_TIMER_DATA.equals(event)) {
-                          String data = Constants.SSE_DATA_PREFIX + event + Constants.SSE_DATA_SUFFIX;
-                          boolean offer = false;
-                          synchronized (queue) {
-                              offer = queue.offer(data);
-                          }
-                          if (!offer) {
-                              numDroppedBytesCounter.increment(data.length());
-                              numDroppedMessagesCounter.increment();
-                          }
+                            String data = Constants.SSE_DATA_PREFIX + event + Constants.SSE_DATA_SUFFIX;
+                            boolean offer = false;
+                            synchronized (queue) {
+                                offer = queue.offer(data);
+                            }
+                            if (!offer) {
+                                numDroppedBytesCounter.increment(data.length());
+                                numDroppedMessagesCounter.increment();
+                            }
                         }
                     })
                     .subscribe();
@@ -248,7 +248,9 @@ public class MantisSSEHandler extends SimpleChannelInboundHandler<FullHttpReques
             return byteBuf;
         }
 
-        public HttpResponseHeaders getResponseHeaders() { return responseHeaders; }
+        public HttpResponseHeaders getResponseHeaders() {
+            return responseHeaders;
+        }
     }
 
     public static Observable<MasterResponse> callPostOnMaster(Observable<MasterDescription> masterObservable, String uri, String content) {

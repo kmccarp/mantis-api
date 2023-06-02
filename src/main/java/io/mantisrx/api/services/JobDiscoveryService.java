@@ -131,11 +131,11 @@ public class JobDiscoveryService {
          * @param retryCount        - No. of retires in case of error connecting to schedulingInfo
          */
         JobSchedulingInfoSubjectHolder(MantisClient mantisClient,
-                                       String jobId,
-                                       Action1 onZeroConnections,
-                                       int retryCount,
-                                       Registry registry,
-                                       Scheduler scheduler) {
+                String jobId,
+                Action1 onZeroConnections,
+                int retryCount,
+                Registry registry,
+                Scheduler scheduler) {
             Preconditions.checkNotNull(mantisClient, "Mantis Client cannot be null");
             Preconditions.checkNotNull(jobId, "JobId cannot be null");
             Preconditions.checkArgument(!jobId.isEmpty(), "JobId cannot be empty");
@@ -206,24 +206,34 @@ public class JobDiscoveryService {
             return schedulingInfoBehaviorSubjectingSubject
 
                     .doOnSubscribe(() -> {
-                        if (log.isDebugEnabled()) { log.debug("Subscribed"); }
+                        if (log.isDebugEnabled()) {
+                            log.debug("Subscribed");
+                        }
                         subscriberCount.incrementAndGet();
                         subscriberCountGauge.set(subscriberCount.get());
-                        if (log.isDebugEnabled()) { log.debug("Subscriber count " + subscriberCount.get()); }
+                        if (log.isDebugEnabled()) {
+                            log.debug("Subscriber count " + subscriberCount.get());
+                        }
                     })
                     .doOnUnsubscribe(() -> {
-                        if (log.isDebugEnabled()) {log.debug("UnSubscribed"); }
+                        if (log.isDebugEnabled()) {
+                            log.debug("UnSubscribed");
+                        }
                         int subscriberCnt = subscriberCount.decrementAndGet();
                         subscriberCountGauge.set(subscriberCount.get());
-                        if (log.isDebugEnabled()) { log.debug("Subscriber count " + subscriberCnt); }
+                        if (log.isDebugEnabled()) {
+                            log.debug("Subscriber count " + subscriberCnt);
+                        }
                         if (0 == subscriberCount.get()) {
-                            if (log.isDebugEnabled()) { log.debug("Shutting down"); }
+                            if (log.isDebugEnabled()) {
+                                log.debug("Shutting down");
+                            }
                             close();
 
                         }
                     })
                     .doOnError((t) -> close())
-                    ;
+            ;
         }
 
         /**
@@ -233,9 +243,13 @@ public class JobDiscoveryService {
 
         @Override
         public void close() {
-            if (log.isDebugEnabled()) { log.debug("In Close Unsubscribing...." + subscription.isUnsubscribed()); }
+            if (log.isDebugEnabled()) {
+                log.debug("In Close Unsubscribing...." + subscription.isUnsubscribed());
+            }
             if (inited.get() && subscription != null && !subscription.isUnsubscribed()) {
-                if (log.isDebugEnabled()) { log.debug("Unsubscribing...."); }
+                if (log.isDebugEnabled()) {
+                    log.debug("Unsubscribing....");
+                }
                 subscription.unsubscribe();
                 inited.set(false);
                 initComplete = new CountDownLatch(1);
@@ -295,10 +309,10 @@ public class JobDiscoveryService {
          * @param retryCount        - No. of retires in case of error connecting to schedulingInfo
          */
         JobDiscoveryInfoSubjectHolder(MantisClient mantisClient,
-                                      JobDiscoveryLookupKey lookupKey,
-                                      Action1 onZeroConnections,
-                                      int retryCount,
-                                      Scheduler scheduler) {
+                JobDiscoveryLookupKey lookupKey,
+                Action1 onZeroConnections,
+                int retryCount,
+                Scheduler scheduler) {
             Preconditions.checkNotNull(mantisClient, "Mantis Client cannot be null");
             Preconditions.checkNotNull(lookupKey, "lookup key cannot be null");
             Preconditions.checkArgument(lookupKey.getId() != null && !lookupKey.getId().isEmpty(), "lookup key cannot be empty or null");
@@ -380,24 +394,34 @@ public class JobDiscoveryService {
             init();
             return discoveryInfoBehaviorSubject
                     .doOnSubscribe(() -> {
-                        if (log.isDebugEnabled()) { log.debug("Subscribed"); }
+                        if (log.isDebugEnabled()) {
+                            log.debug("Subscribed");
+                        }
                         subscriberCount.incrementAndGet();
                         subscriberCountGauge.set(subscriberCount.get());
-                        if (log.isDebugEnabled()) { log.debug("Subscriber count " + subscriberCount.get()); }
+                        if (log.isDebugEnabled()) {
+                            log.debug("Subscriber count " + subscriberCount.get());
+                        }
                     })
                     .doOnUnsubscribe(() -> {
-                        if (log.isDebugEnabled()) {log.debug("UnSubscribed"); }
+                        if (log.isDebugEnabled()) {
+                            log.debug("UnSubscribed");
+                        }
                         int subscriberCnt = subscriberCount.decrementAndGet();
                         subscriberCountGauge.set(subscriberCount.get());
-                        if (log.isDebugEnabled()) { log.debug("Subscriber count " + subscriberCnt); }
+                        if (log.isDebugEnabled()) {
+                            log.debug("Subscriber count " + subscriberCnt);
+                        }
                         if (0 == subscriberCount.get()) {
-                            if (log.isDebugEnabled()) { log.debug("Shutting down"); }
+                            if (log.isDebugEnabled()) {
+                                log.debug("Shutting down");
+                            }
                             close();
 
                         }
                     })
                     .doOnError((t) -> close())
-                    ;
+            ;
         }
 
         /**
@@ -407,9 +431,13 @@ public class JobDiscoveryService {
 
         @Override
         public void close() {
-            if (log.isDebugEnabled()) { log.debug("In Close un-subscribing...." + subscription.isUnsubscribed()); }
+            if (log.isDebugEnabled()) {
+                log.debug("In Close un-subscribing...." + subscription.isUnsubscribed());
+            }
             if (inited.get() && subscription != null && !subscription.isUnsubscribed()) {
-                if (log.isDebugEnabled()) { log.debug("Unsubscribing...."); }
+                if (log.isDebugEnabled()) {
+                    log.debug("Unsubscribing....");
+                }
                 subscription.unsubscribe();
                 inited.set(false);
                 initComplete = new CountDownLatch(1);
@@ -473,7 +501,9 @@ public class JobDiscoveryService {
      * Invoked by the subjectHolders when the subscription count goes to 0 (or if there is an error)
      */
     private final Action1<JobDiscoveryLookupKey> removeSubjectAction = key -> {
-        if (log.isDebugEnabled()) { log.info("Removing subject for key {}", key.toString()); }
+        if (log.isDebugEnabled()) {
+            log.info("Removing subject for key {}", key.toString());
+        }
         removeSchedulingInfoSubject(key);
     };
 

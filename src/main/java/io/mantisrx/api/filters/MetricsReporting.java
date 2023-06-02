@@ -23,7 +23,7 @@ public class MetricsReporting extends HttpOutboundSyncFilter {
 
         // Record Latency. Zuul no longer record total request time.
         timerCache.computeIfAbsent(Tuple.of(path, status),
-                tuple -> SpectatorUtils.newTimer("latency", path,"status", status))
+                tuple -> SpectatorUtils.newTimer("latency", path, "status", status))
                 .record(input.getContext().getOriginReportedDuration(), TimeUnit.NANOSECONDS);
 
         // Record Request

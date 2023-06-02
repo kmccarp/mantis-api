@@ -54,10 +54,10 @@ public class ConnectionBroker {
 
     @Inject
     public ConnectionBroker(MantisClient mantisClient,
-                            MantisCrossRegionalClient mantisCrossRegionalClient,
-                            WorkerMetricsClient workerMetricsClient,
-                            @Named("io-scheduler") Scheduler scheduler,
-                            ObjectMapper objectMapper) {
+            MantisCrossRegionalClient mantisCrossRegionalClient,
+            WorkerMetricsClient workerMetricsClient,
+            @Named("io-scheduler") Scheduler scheduler,
+            ObjectMapper objectMapper) {
         this.mantisClient = mantisClient;
         this.mantisCrossRegionalClient = mantisCrossRegionalClient;
         this.workerMetricsClient = workerMetricsClient;
@@ -72,16 +72,16 @@ public class ConnectionBroker {
             switch (details.type) {
                 case CONNECT_BY_NAME:
                     return getConnectByNameFor(details)
-                                    .subscribeOn(scheduler)
-                                    .doOnUnsubscribe(() -> {
-                                        log.info("Purging {} from cache.", details);
-                                        connectionCache.remove(details);
-                                    })
-                                    .doOnCompleted(() -> {
-                                        log.info("Purging {} from cache.", details);
-                                        connectionCache.remove(details);
-                                    })
-                                    .share();
+                            .subscribeOn(scheduler)
+                            .doOnUnsubscribe(() -> {
+                                log.info("Purging {} from cache.", details);
+                                connectionCache.remove(details);
+                            })
+                            .doOnCompleted(() -> {
+                                log.info("Purging {} from cache.", details);
+                                connectionCache.remove(details);
+                            })
+                            .share();
                 case CONNECT_BY_ID:
                     return getConnectByIdFor(details)
                             .subscribeOn(scheduler)
@@ -136,15 +136,15 @@ public class ConnectionBroker {
                                         log.info("Purging {} from cache.", details);
                                         connectionCache.remove(details);
                                     })
-                            .replay(1)
-                            .autoConnect());
+                                    .replay(1)
+                                    .autoConnect());
                     break;
 
                 case JOB_CLUSTER_DISCOVERY:
                     connectionCache.put(details,
                             jobDiscoveryService.jobDiscoveryInfoStream(jobDiscoveryService.key(JobDiscoveryService.LookupType.JOB_CLUSTER, details.target))
                                     .subscribeOn(scheduler)
-                                    .map(jdi ->Try.of(() -> objectMapper.writeValueAsString(jdi)).getOrElse("Error"))
+                                    .map(jdi -> Try.of(() -> objectMapper.writeValueAsString(jdi)).getOrElse("Error"))
                                     .doOnCompleted(() -> {
                                         log.info("Purging {} from cache.", details);
                                         connectionCache.remove(details);
@@ -190,7 +190,7 @@ public class ConnectionBroker {
     }
 
     private static Observable<Observable<MantisServerSentEvent>> getResults(boolean isJobId, MantisClient mantisClient,
-                                                                            final String target, SinkParameters sinkParameters) {
+            final String target, SinkParameters sinkParameters) {
         final AtomicBoolean hasError = new AtomicBoolean();
         return  isJobId ?
                 mantisClient.getSinkClientByJobId(target, getSseConnFunc(target, sinkParameters), null).getResults() :
@@ -222,21 +222,21 @@ public class ConnectionBroker {
                                 .submit(HttpClientRequest.createGet(uri))
                                 .retryWhen(Util.getRetryFunc(log, uri + " in " + region))
                                 .doOnError(throwable -> log.warn(
-                                        "Error getting response from remote SSE server for uri {} in region {}: {}",
-                                        uri, region, throwable.getMessage(), throwable)
+                                                "Error getting response from remote SSE server for uri {} in region {}: {}",
+                                                uri, region, throwable.getMessage(), throwable)
                                 ).flatMap(remoteResponse -> {
-                                    if (!remoteResponse.getStatus().reasonPhrase().equals("OK")) {
-                                        log.warn("Unexpected response from remote sink for uri {} region {}: {}", uri, region, remoteResponse.getStatus().reasonPhrase());
-                                        String err = remoteResponse.getHeaders().get(Constants.metaErrorMsgHeader);
-                                        if (err == null || err.isEmpty())
-                                            err = remoteResponse.getStatus().reasonPhrase();
-                                        return Observable.<MantisServerSentEvent>error(new Exception(err))
-                                                .map(datum -> datum.getEventAsString());
-                                    }
-                                    return clientResponseToObservable(remoteResponse, target, region, uri)
-                                            .map(datum -> datum.replaceFirst("^\\{", originReplacement))
-                                            .doOnError(t -> log.error(t.getMessage()));
-                                })
+                            if (!remoteResponse.getStatus().reasonPhrase().equals("OK")) {
+                                log.warn("Unexpected response from remote sink for uri {} region {}: {}", uri, region, remoteResponse.getStatus().reasonPhrase());
+                                String err = remoteResponse.getHeaders().get(Constants.metaErrorMsgHeader);
+                                if (err == null || err.isEmpty())
+                                    err = remoteResponse.getStatus().reasonPhrase();
+                                return Observable.<MantisServerSentEvent>error(new Exception(err))
+                                        .map(datum -> datum.getEventAsString());
+                            }
+                            return clientResponseToObservable(remoteResponse, target, region, uri)
+                                    .map(datum -> datum.replaceFirst("^\\{", originReplacement))
+                                    .doOnError(t -> log.error(t.getMessage()));
+                        })
                                 .subscribeOn(scheduler)
                                 .observeOn(scheduler)
                                 .doOnError(t -> log.warn("Error streaming in remote data ({}). Will retry: {}", region, t.getMessage(), t))

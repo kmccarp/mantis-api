@@ -1,4 +1,5 @@
 package io.mantisrx.api.services.artifacts;
+
 /*
  * Copyright 2019 Netflix, Inc.
  *

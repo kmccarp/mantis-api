@@ -40,7 +40,7 @@ public class MREAppStreamToJobClusterMapping extends HttpSyncEndpoint {
 
     @Inject
     public MREAppStreamToJobClusterMapping(AppStreamDiscoveryService appStreamDiscoveryService,
-                                           ObjectMapper objectMapper) {
+            ObjectMapper objectMapper) {
         Preconditions.checkArgument(appStreamDiscoveryService != null, "appStreamDiscoveryService cannot be null");
         this.appStreamDiscoveryService = appStreamDiscoveryService;
         Preconditions.checkArgument(objectMapper != null, "objectMapper cannot be null");

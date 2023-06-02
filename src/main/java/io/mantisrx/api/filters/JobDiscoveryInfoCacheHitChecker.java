@@ -30,33 +30,33 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class JobDiscoveryInfoCacheHitChecker extends HttpInboundSyncFilter {
 
-   public static final String PATH_SPEC = "/jobClusters/discoveryInfo";
-   private static DynamicBooleanProperty cacheEnabled = new DynamicBooleanProperty("mantisapi.cache.enabled", false);
+    public static final String PATH_SPEC = "/jobClusters/discoveryInfo";
+    private static DynamicBooleanProperty cacheEnabled = new DynamicBooleanProperty("mantisapi.cache.enabled", false);
 
-   @Override
-   public int filterOrder() {
-      return -1;
-   }
+    @Override
+    public int filterOrder() {
+        return -1;
+    }
 
-   @Override
-   public boolean shouldFilter(HttpRequestMessage httpRequestMessage) {
-      String jobCluster = httpRequestMessage.getPath().replaceFirst(PATH_SPEC + "/", "");
-      return httpRequestMessage.getPath().startsWith(PATH_SPEC)
-              && JobDiscoveryService.jobDiscoveryInfoCache.getIfPresent(jobCluster) != null;
-   }
+    @Override
+    public boolean shouldFilter(HttpRequestMessage httpRequestMessage) {
+        String jobCluster = httpRequestMessage.getPath().replaceFirst(PATH_SPEC + "/", "");
+        return httpRequestMessage.getPath().startsWith(PATH_SPEC)
+                && JobDiscoveryService.jobDiscoveryInfoCache.getIfPresent(jobCluster) != null;
+    }
 
-   @Override
-   public HttpRequestMessage apply(HttpRequestMessage request) {
-      String jobCluster = request.getPath().replaceFirst(PATH_SPEC + "/", "");
-      HttpResponseMessage resp = new HttpResponseMessageImpl(request.getContext(), request, 200);
-      String bodyText = JobDiscoveryService.jobDiscoveryInfoCache.getIfPresent(jobCluster) ;
-      if (cacheEnabled.get() && !Strings.isNullOrEmpty(bodyText)) {
-         log.info("Serving cached job discovery info for {}.", jobCluster);
-         resp.setBodyAsText(bodyText);
-         resp.getHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(), HttpHeaderValues.APPLICATION_JSON.toString());
-         resp.getHeaders().set(Constants.MANTISAPI_CACHED_HEADER, "true");
-         request.getContext().setStaticResponse(resp);
-      }
-      return request;
-   }
+    @Override
+    public HttpRequestMessage apply(HttpRequestMessage request) {
+        String jobCluster = request.getPath().replaceFirst(PATH_SPEC + "/", "");
+        HttpResponseMessage resp = new HttpResponseMessageImpl(request.getContext(), request, 200);
+        String bodyText = JobDiscoveryService.jobDiscoveryInfoCache.getIfPresent(jobCluster) ;
+        if (cacheEnabled.get() && !Strings.isNullOrEmpty(bodyText)) {
+            log.info("Serving cached job discovery info for {}.", jobCluster);
+            resp.setBodyAsText(bodyText);
+            resp.getHeaders().set(HttpHeaderNames.CONTENT_TYPE.toString(), HttpHeaderValues.APPLICATION_JSON.toString());
+            resp.getHeaders().set(Constants.MANTISAPI_CACHED_HEADER, "true");
+            request.getContext().setStaticResponse(resp);
+        }
+        return request;
+    }
 }

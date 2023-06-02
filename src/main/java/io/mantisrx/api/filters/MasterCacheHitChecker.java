@@ -35,7 +35,7 @@ public class MasterCacheHitChecker extends HttpInboundSyncFilter {
 
     @Override
     public HttpRequestMessage apply(HttpRequestMessage request) {
-        if(cacheEnabled.get()) {
+        if (cacheEnabled.get()) {
             String key = request.getPathAndQuery();
             String bodyText = MasterCacheLoader.masterCache.getIfPresent(key);
 

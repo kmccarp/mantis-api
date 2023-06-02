@@ -43,7 +43,7 @@ public class AppStreamDiscovery extends HttpSyncEndpoint {
 
     @Inject
     public AppStreamDiscovery(AppStreamDiscoveryService appStreamDiscoveryService,
-                              ObjectMapper objectMapper) {
+            ObjectMapper objectMapper) {
         this.appStreamDiscoveryService = appStreamDiscoveryService;
         this.objectMapper = objectMapper;
     }
@@ -76,6 +76,6 @@ public class AppStreamDiscovery extends HttpSyncEndpoint {
                 resp.setBodyAsText(serialized.getOrElseGet(Throwable::getMessage));
                 return resp;
             }
-       }).getOrElseGet(Function.identity());
+        }).getOrElseGet(Function.identity());
     }
 }

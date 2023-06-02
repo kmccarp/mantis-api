@@ -1,4 +1,5 @@
 package io.mantisrx.api.services.artifacts;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

@@ -31,7 +31,7 @@ public class AppDiscoveryMap {
     }
 
     public void addMapping(String app, String stream, JobSchedulingInfo schedulingInfo) {
-        if(!mappings.containsKey(app)) {
+        if (!mappings.containsKey(app)) {
             mappings.put(app, new HashMap<String, JobSchedulingInfo>());
         }
         mappings.get(app).put(stream, schedulingInfo);

@@ -17,70 +17,70 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ConfigurationBasedAppStreamStore implements AppStreamStore {
 
-  private final JsonSerializer jsonSerializer;
+    private final JsonSerializer jsonSerializer;
 
-  private final AtomicReference<AppJobClustersMap> appJobClusterMappings = new AtomicReference<>();
+    private final AtomicReference<AppJobClustersMap> appJobClusterMappings = new AtomicReference<>();
 
-  private final Counter appJobClusterMappingNullCount;
-  private final Counter appJobClusterMappingFailCount;
-  private final Counter appJobClusterMappingRequestCount;
+    private final Counter appJobClusterMappingNullCount;
+    private final Counter appJobClusterMappingFailCount;
+    private final Counter appJobClusterMappingRequestCount;
 
-  public ConfigurationBasedAppStreamStore(ConfigSource configSource) {
-    configSource.getListenable()
-        .addListener((newConfig) -> updateAppJobClustersMapping(newConfig));
-    this.jsonSerializer = new JsonSerializer();
-    updateAppJobClustersMapping(configSource.get());
+    public ConfigurationBasedAppStreamStore(ConfigSource configSource) {
+        configSource.getListenable()
+                .addListener((newConfig) -> updateAppJobClustersMapping(newConfig));
+        this.jsonSerializer = new JsonSerializer();
+        updateAppJobClustersMapping(configSource.get());
 
-    this.appJobClusterMappingNullCount = SpectatorUtils.newCounter(
-        "appJobClusterMappingNull", "mantisapi");
-    this.appJobClusterMappingRequestCount = SpectatorUtils.newCounter(
-        "appJobClusterMappingRequest", "mantisapi", "app", "unknown");
-    this.appJobClusterMappingFailCount = SpectatorUtils.newCounter(
-        "appJobClusterMappingFail", "mantisapi");
-  }
-
-  @Override
-  public AppJobClustersMap getJobClusterMappings(Collection<String> apps) throws IOException {
-    return getAppJobClustersMap(apps, this.appJobClusterMappings.get());
-  }
-
-  private AppJobClustersMap getAppJobClustersMap(Collection<String> appNames,
-      @Nullable AppJobClustersMap appJobClustersMap) throws IOException {
-
-    if (appJobClustersMap != null) {
-      final AppJobClustersMap appJobClusters;
-      if (appNames.size() > 0) {
-        appJobClusters = appJobClustersMap.getFilteredAppJobClustersMap(new ArrayList<>(appNames));
-      } else {
-        appJobClusterMappingRequestCount.increment();
-        appJobClusters = appJobClustersMap;
-      }
-      return appJobClusters;
-    } else {
-      appJobClusterMappingNullCount.increment();
-      throw new IOException("AppJobClustersMap is null");
+        this.appJobClusterMappingNullCount = SpectatorUtils.newCounter(
+                "appJobClusterMappingNull", "mantisapi");
+        this.appJobClusterMappingRequestCount = SpectatorUtils.newCounter(
+                "appJobClusterMappingRequest", "mantisapi", "app", "unknown");
+        this.appJobClusterMappingFailCount = SpectatorUtils.newCounter(
+                "appJobClusterMappingFail", "mantisapi");
     }
-  }
 
-  private void updateAppJobClustersMapping(String appJobClusterStr) {
-    try {
-      AppJobClustersMap appJobClustersMap =
-          jsonSerializer.fromJSON(appJobClusterStr, AppJobClustersMap.class);
-      log.info("appJobClustersMap updated to {}", appJobClustersMap);
-      appJobClusterMappings.set(appJobClustersMap);
-    } catch (Exception ioe) {
-      log.error("failed to update appJobClustersMap on Property update {}", appJobClusterStr, ioe);
-      appJobClusterMappingFailCount.increment();
+    @Override
+    public AppJobClustersMap getJobClusterMappings(Collection<String> apps) throws IOException {
+        return getAppJobClustersMap(apps, this.appJobClusterMappings.get());
     }
-  }
 
-  public interface ConfigSource extends Supplier<String> {
+    private AppJobClustersMap getAppJobClustersMap(Collection<String> appNames,
+            @Nullable AppJobClustersMap appJobClustersMap) throws IOException {
 
-    Listenable<ConfigurationChangeListener> getListenable();
-  }
+        if (appJobClustersMap != null) {
+            final AppJobClustersMap appJobClusters;
+            if (appNames.size() > 0) {
+                appJobClusters = appJobClustersMap.getFilteredAppJobClustersMap(new ArrayList<>(appNames));
+            } else {
+                appJobClusterMappingRequestCount.increment();
+                appJobClusters = appJobClustersMap;
+            }
+            return appJobClusters;
+        } else {
+            appJobClusterMappingNullCount.increment();
+            throw new IOException("AppJobClustersMap is null");
+        }
+    }
 
-  public interface ConfigurationChangeListener {
+    private void updateAppJobClustersMapping(String appJobClusterStr) {
+        try {
+            AppJobClustersMap appJobClustersMap =
+                    jsonSerializer.fromJSON(appJobClusterStr, AppJobClustersMap.class);
+            log.info("appJobClustersMap updated to {}", appJobClustersMap);
+            appJobClusterMappings.set(appJobClustersMap);
+        } catch (Exception ioe) {
+            log.error("failed to update appJobClustersMap on Property update {}", appJobClusterStr, ioe);
+            appJobClusterMappingFailCount.increment();
+        }
+    }
 
-    void onConfigChange(String config);
-  }
+    public interface ConfigSource extends Supplier<String> {
+
+        Listenable<ConfigurationChangeListener> getListenable();
+    }
+
+    public interface ConfigurationChangeListener {
+
+        void onConfigChange(String config);
+    }
 }

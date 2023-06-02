@@ -34,11 +34,13 @@ import java.nio.charset.Charset;
 public class MQLParser extends HttpSyncEndpoint {
 
     private static IFn require = Clojure.var("io.mantisrx.mql.shaded.clojure.core", "require");
+
     static {
         require.invoke(Clojure.read("io.mantisrx.mql.core"));
         require.invoke(Clojure.read("io.mantisrx.mql.jvm.interfaces.server"));
         require.invoke(Clojure.read("io.mantisrx.mql.jvm.interfaces.core"));
     }
+
     private static IFn parses = Clojure.var("io.mantisrx.mql.jvm.interfaces.core", "parses?");
     private static IFn getParseError = Clojure.var("io.mantisrx.mql.jvm.interfaces.core", "get-parse-error");
 

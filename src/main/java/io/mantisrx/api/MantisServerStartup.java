@@ -62,18 +62,18 @@ public class MantisServerStartup extends BaseServerStartup {
 
     @Inject
     public MantisServerStartup(ServerStatusManager serverStatusManager, FilterLoader filterLoader,
-                               SessionContextDecorator sessionCtxDecorator, FilterUsageNotifier usageNotifier,
-                               RequestCompleteHandler reqCompleteHandler, Registry registry,
-                               DirectMemoryMonitor directMemoryMonitor, EventLoopGroupMetrics eventLoopGroupMetrics,
-                               EurekaClient discoveryClient, ApplicationInfoManager applicationInfoManager,
-                               AccessLogPublisher accessLogPublisher,
-                               AbstractConfiguration configurationManager,
-                               HighAvailabilityServices highAvailabilityServices,
-                               MantisCrossRegionalClient mantisCrossRegionalClient,
-                               ConnectionBroker connectionBroker,
-                               @Named("io-scheduler") Scheduler scheduler,
-                               @Named("push-prefixes") List<String> pushPrefixes
-                               ) {
+            SessionContextDecorator sessionCtxDecorator, FilterUsageNotifier usageNotifier,
+            RequestCompleteHandler reqCompleteHandler, Registry registry,
+            DirectMemoryMonitor directMemoryMonitor, EventLoopGroupMetrics eventLoopGroupMetrics,
+            EurekaClient discoveryClient, ApplicationInfoManager applicationInfoManager,
+            AccessLogPublisher accessLogPublisher,
+            AbstractConfiguration configurationManager,
+            HighAvailabilityServices highAvailabilityServices,
+            MantisCrossRegionalClient mantisCrossRegionalClient,
+            ConnectionBroker connectionBroker,
+            @Named("io-scheduler") Scheduler scheduler,
+            @Named("push-prefixes") List<String> pushPrefixes
+        ) {
         super(serverStatusManager, filterLoader, sessionCtxDecorator, usageNotifier, reqCompleteHandler, registry,
                 directMemoryMonitor, eventLoopGroupMetrics, discoveryClient, applicationInfoManager,
                 accessLogPublisher);
@@ -119,7 +119,7 @@ public class MantisServerStartup extends BaseServerStartup {
                 sockAddr,
                 new MantisApiServerChannelInitializer(
                         String.valueOf(port), channelConfig, channelDependencies, clientChannels, pushPrefixes,
-                    highAvailabilityServices, mantisCrossRegionalClient, connectionBroker,
+                        highAvailabilityServices, mantisCrossRegionalClient, connectionBroker,
                         scheduler, false));
         logAddrConfigured(sockAddr);
 

@@ -97,15 +97,15 @@ public class CrossRegionHandler extends SimpleChannelInboundHandler<FullHttpRequ
     private ScheduledFuture drainFuture;
     private final DynamicIntProperty queueCapacity = new DynamicIntProperty("io.mantisrx.api.push.queueCapacity", 1000);
     private final DynamicIntProperty writeIntervalMillis = new DynamicIntProperty("io.mantisrx.api.push.writeIntervalMillis", 50);
-	private final DynamicStringProperty tunnelRegionsProperty = new DynamicStringProperty("io.mantisrx.api.tunnel.regions", Util.getLocalRegion());
+    private final DynamicStringProperty tunnelRegionsProperty = new DynamicStringProperty("io.mantisrx.api.tunnel.regions", Util.getLocalRegion());
 
-	private List<String> getTunnelRegions() {
-		return Arrays.asList(tunnelRegionsProperty.get().split(","))
-            .stream()
-            .map(String::trim)
-            .map(String::toLowerCase)
-            .collect(Collectors.toList());
-	}
+    private List<String> getTunnelRegions() {
+        return Arrays.asList(tunnelRegionsProperty.get().split(","))
+                .stream()
+                .map(String::trim)
+                .map(String::toLowerCase)
+                .collect(Collectors.toList());
+    }
 
     public CrossRegionHandler(
             List<String> pushPrefixes,
@@ -133,7 +133,7 @@ public class CrossRegionHandler extends SimpleChannelInboundHandler<FullHttpRequ
                 handleHead(ctx, request);
             } else if (request.method() == HttpMethod.GET) {
                 handleRestGet(ctx, request);
-            } else if(request.method() == HttpMethod.POST) {
+            } else if (request.method() == HttpMethod.POST) {
                 handleRestPost(ctx, request);
             } else {
                 ctx.fireChannelRead(request.retain());
@@ -323,15 +323,15 @@ public class CrossRegionHandler extends SimpleChannelInboundHandler<FullHttpRequ
                 .doOnNext(event -> {
                     numIncomingMessagesCounter.increment();
                     if (!Constants.DUMMY_TIMER_DATA.equals(event)) {
-                      String data = Constants.SSE_DATA_PREFIX + event + Constants.SSE_DATA_SUFFIX;
+                        String data = Constants.SSE_DATA_PREFIX + event + Constants.SSE_DATA_SUFFIX;
                         boolean offer = false;
                         synchronized (queue) {
                             offer = queue.offer(data);
                         }
                         if (!offer) {
-                          numDroppedBytesCounter.increment(data.length());
-                          numDroppedMessagesCounter.increment();
-                      }
+                            numDroppedBytesCounter.increment(data.length());
+                            numDroppedMessagesCounter.increment();
+                        }
                     }
                 })
                 .subscribe();
@@ -384,7 +384,7 @@ public class CrossRegionHandler extends SimpleChannelInboundHandler<FullHttpRequ
                 .collect(Unpooled::buffer,
                         ByteBuf::writeBytes)
                 .map(byteBuf -> new RegionData(region, true,
-                        byteBuf.toString(StandardCharsets.UTF_8), code)
+                                byteBuf.toString(StandardCharsets.UTF_8), code)
                 )
                 .onErrorReturn(t -> new RegionData(region, false, t.getMessage(), code));
     }
@@ -455,8 +455,7 @@ public class CrossRegionHandler extends SimpleChannelInboundHandler<FullHttpRequ
         boolean first = true;
         for (RegionData data : dataList) {
             if (first)
-                first = false;
-            else {
+                first = false;else {
                 sb.append(",");
             }
             if (data.isSuccess()) {
