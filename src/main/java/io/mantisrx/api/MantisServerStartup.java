@@ -85,7 +85,7 @@ public class MantisServerStartup extends BaseServerStartup {
         highAvailabilityServices
                 .getMasterMonitor()
                 .getMasterObservable()
-                .filter(x -> x != null)
+                .filter(Objects::nonNull)
                 .forEach(masterDescription -> {
                     LOG.info("Received new Mantis Master: " + masterDescription);
                     configurationManager.setProperty("api.ribbon.listOfServers",
