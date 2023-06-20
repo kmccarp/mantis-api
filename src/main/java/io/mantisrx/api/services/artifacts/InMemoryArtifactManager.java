@@ -9,7 +9,7 @@ import io.mantisrx.api.proto.Artifact;
 
 
 public class InMemoryArtifactManager implements ArtifactManager {
-    private Map<String, Artifact> artifacts = new HashMap<>();
+    private final Map<String, Artifact> artifacts = new HashMap<>();
 
     @Override
     public List<String> getArtifacts() {

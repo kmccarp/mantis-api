@@ -98,7 +98,7 @@ public class AppStreamDiscoveryService {
                 .map(Option::of)
                 .take(1)
                 .timeout(2, TimeUnit.SECONDS, Observable.just(Option.none()))
-                .doOnError((t) -> {
+                .doOnError(t -> {
                     log.warn("Timed out looking up job discovery info for cluster: " + jobCluster + ".");
                 })
                 .subscribeOn(scheduler)
