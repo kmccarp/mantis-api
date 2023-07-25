@@ -30,7 +30,7 @@ public class OutboundHeaders extends HttpOutboundSyncFilter {
     }
 
     private void addHeaderIfMissing(HttpResponseMessage resp, AsciiString name, String value) {
-        if (resp.getHeaders().getAll(name.toString()).size() == 0) {
+        if (resp.getHeaders().getAll(name.toString()).isEmpty()) {
             resp.getHeaders().add(name.toString(), value);
         }
     }

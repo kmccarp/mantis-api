@@ -65,7 +65,7 @@ public class MantisWebSocketFrameHandler extends SimpleChannelInboundHandler<Tex
 
             drainFuture = scheduledExecutorService.scheduleAtFixedRate(() -> {
                 try {
-                    if (queue.size() > 0 && ctx.channel().isWritable()) {
+                    if (!queue.isEmpty() && ctx.channel().isWritable()) {
                         drainTriggeredCounter.increment();
                         final List<String> items = new ArrayList<>(queue.size());
                         synchronized (queue) {
