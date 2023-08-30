@@ -87,8 +87,8 @@ public class CrossRegionHandler extends SimpleChannelInboundHandler<FullHttpRequ
     private final ConnectionBroker connectionBroker;
     private final Scheduler scheduler;
 
-    private Subscription subscription = null;
-    private String uriForLogging = null;
+    private Subscription subscription;
+    private String uriForLogging;
     private ScheduledExecutorService scheduledExecutorService = new ScheduledThreadPoolExecutor(1,
             new ThreadFactoryBuilder().setNameFormat("cross-region-handler-drainer-%d").build());
     private ScheduledFuture drainFuture;
@@ -208,8 +208,9 @@ public class CrossRegionHandler extends SimpleChannelInboundHandler<FullHttpRequ
                             })
                             .map(data -> {
                                 final Throwable t = ref.get();
-                                if (t != null)
+                                if (t != null) {
                                     throw new RuntimeException(t);
+                                }
                                 return data;
                             })
                             .retryWhen(Util.getRetryFunc(log, uri + " in " + region))
@@ -257,8 +258,9 @@ public class CrossRegionHandler extends SimpleChannelInboundHandler<FullHttpRequ
                                     }))
                             .map(data -> {
                                 final Throwable t = ref.get();
-                                if (t != null)
+                                if (t != null) {
                                     throw new RuntimeException(t);
+                                }
                                 return data;
                             })
                             .retryWhen(Util.getRetryFunc(log, uri + " in " + region))
@@ -304,11 +306,11 @@ public class CrossRegionHandler extends SimpleChannelInboundHandler<FullHttpRequ
         Counter drainTriggeredCounter = SpectatorUtils.newCounter(Constants.drainTriggeredCounterName, pcd.target, tags);
         Counter numIncomingMessagesCounter = SpectatorUtils.newCounter(Constants.numIncomingMessagesCounterName, pcd.target, tags);
 
-        BlockingQueue<String> queue = new LinkedBlockingQueue<String>(queueCapacity.get());
+        BlockingQueue<String> queue = new LinkedBlockingQueue<>(queueCapacity.get());
 
         drainFuture = scheduledExecutorService.scheduleAtFixedRate(() -> {
             try {
-                if (queue.size() > 0 && ctx.channel().isWritable()) {
+                if (!queue.isEmpty() && ctx.channel().isWritable()) {
                     drainTriggeredCounter.increment();
                     final List<String> items = new ArrayList<>(queue.size());
                     synchronized (queue) {
@@ -463,16 +465,16 @@ public class CrossRegionHandler extends SimpleChannelInboundHandler<FullHttpRequ
      * specified by {@link CrossRegionHandler#getTunnelRegions()}
      */
     private static boolean isAllRegion(String region) {
-        return region != null && region.trim().equalsIgnoreCase("all");
+        return region != null && "all".equalsIgnoreCase(region.trim());
     }
 
     private static String responseToString(List<RegionData> dataList) {
         StringBuilder sb = new StringBuilder("[");
         boolean first = true;
         for (RegionData data : dataList) {
-            if (first)
+            if (first) {
                 first = false;
-            else {
+            } else {
                 sb.append(",");
             }
             if (data.isSuccess()) {
@@ -486,9 +488,9 @@ public class CrossRegionHandler extends SimpleChannelInboundHandler<FullHttpRequ
         return sb.toString();
     }
 
-    private final static String regKey = "mantis.meta.origin";
-    private final static String errKey = "mantis.meta.errorString";
-    private final static String codeKey = "mantis.meta.origin.response.code";
+    private static final String regKey = "mantis.meta.origin";
+    private static final String errKey = "mantis.meta.errorString";
+    private static final String codeKey = "mantis.meta.origin.response.code";
 
     public static String getWrappedJson(String data, String region, String err) {
         return getWrappedJsonIntl(data, region, err, 0, false);
@@ -502,33 +504,41 @@ public class CrossRegionHandler extends SimpleChannelInboundHandler<FullHttpRequ
         try {
             JSONObject o = new JSONObject(data);
             o.put(regKey, region);
-            if (err != null && !err.isEmpty())
+            if (err != null && !err.isEmpty()) {
                 o.put(errKey, err);
-            if (code > 0)
+            }
+            if (code > 0) {
                 o.put(codeKey, "" + code);
+            }
             return o.toString();
         } catch (JSONException e) {
             try {
                 JSONArray a = new JSONArray(data);
-                if (!forceJson)
+                if (!forceJson) {
                     return data;
+                }
                 JSONObject o = new JSONObject();
                 o.put(regKey, region);
-                if (err != null && !err.isEmpty())
+                if (err != null && !err.isEmpty()) {
                     o.put(errKey, err);
-                if (code > 0)
+                }
+                if (code > 0) {
                     o.put(codeKey, "" + code);
+                }
                 o.accumulate("response", a);
                 return o.toString();
             } catch (JSONException ae) {
-                if (!forceJson)
+                if (!forceJson) {
                     return data;
+                }
                 JSONObject o = new JSONObject();
                 o.put(regKey, region);
-                if (err != null && !err.isEmpty())
+                if (err != null && !err.isEmpty()) {
                     o.put(errKey, err);
-                if (code > 0)
+                }
+                if (code > 0) {
                     o.put(codeKey, "" + code);
+                }
                 o.put("response", data);
                 return o.toString();
             }
