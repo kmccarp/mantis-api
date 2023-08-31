@@ -228,10 +228,11 @@ public class ConnectionBroker {
                                     if (!remoteResponse.getStatus().reasonPhrase().equals("OK")) {
                                         log.warn("Unexpected response from remote sink for uri {} region {}: {}", uri, region, remoteResponse.getStatus().reasonPhrase());
                                         String err = remoteResponse.getHeaders().get(Constants.metaErrorMsgHeader);
-                                        if (err == null || err.isEmpty())
+                                        if (err == null || err.isEmpty()) {
                                             err = remoteResponse.getStatus().reasonPhrase();
+                                        }
                                         return Observable.<MantisServerSentEvent>error(new Exception(err))
-                                                .map(datum -> datum.getEventAsString());
+                                                .map(MantisServerSentEvent::getEventAsString);
                                     }
                                     return clientResponseToObservable(remoteResponse, target, region, uri)
                                             .map(datum -> datum.replaceFirst("^\\{", originReplacement))
