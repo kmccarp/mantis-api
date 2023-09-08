@@ -44,7 +44,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Slf4j
-public class JobDiscoveryService {
+public final class JobDiscoveryService {
 
     public enum LookupType {
         JOB_CLUSTER,
@@ -71,8 +71,12 @@ public class JobDiscoveryService {
 
         @Override
         public boolean equals(final Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
             final JobDiscoveryLookupKey that = (JobDiscoveryLookupKey) o;
             return lookupType == that.lookupType &&
                     Objects.equals(id, that.id);
@@ -162,7 +166,7 @@ public class JobDiscoveryService {
             if (!inited.getAndSet(true)) {
                 subscription = mantisClient.getSchedulingChanges(jobId)
                         .retryWhen(Util.getRetryFunc(log, "job scheduling information for " + jobId))
-                        .doOnError((t) -> {
+                        .doOnError(t -> {
                             schedulingInfoBehaviorSubjectingSubject.toSerialized().onError(t);
                             doOnZeroConnections.call(jobId);
                         })
@@ -171,7 +175,7 @@ public class JobDiscoveryService {
                             doOnZeroConnections.call(jobId);
                         })
                         .subscribeOn(scheduler)
-                        .subscribe((schedInfo) -> schedulingInfoBehaviorSubjectingSubject.onNext(schedInfo));
+                        .subscribe(schedulingInfoBehaviorSubjectingSubject::onNext);
                 initComplete.countDown();
 
             } else {
@@ -222,7 +226,7 @@ public class JobDiscoveryService {
 
                         }
                     })
-                    .doOnError((t) -> close())
+                    .doOnError(t -> close())
                     ;
         }
 
@@ -246,8 +250,12 @@ public class JobDiscoveryService {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
             JobSchedulingInfoSubjectHolder that = (JobSchedulingInfoSubjectHolder) o;
             return Objects.equals(jobId, that.jobId);
         }
@@ -335,7 +343,7 @@ public class JobDiscoveryService {
                 }
                 subscription = jobSchedulingInfoObs
                         .retryWhen(Util.getRetryFunc(log, "job scheduling info for (" + lookupKey.getLookupType() + ") " + lookupKey.id))
-                        .doOnError((t) -> {
+                        .doOnError(t -> {
                             log.info("cleanup jobDiscoveryInfo onError for {}", lookupKey);
                             discoveryInfoBehaviorSubject.toSerialized().onError(t);
                             doOnZeroConnections.call(lookupKey);
@@ -346,7 +354,7 @@ public class JobDiscoveryService {
                             doOnZeroConnections.call(lookupKey);
                         })
                         .subscribeOn(scheduler)
-                        .subscribe((schedInfo) -> discoveryInfoBehaviorSubject.onNext(schedInfo));
+                        .subscribe(discoveryInfoBehaviorSubject::onNext);
                 initComplete.countDown();
 
             } else {
@@ -396,7 +404,7 @@ public class JobDiscoveryService {
 
                         }
                     })
-                    .doOnError((t) -> close())
+                    .doOnError(t -> close())
                     ;
         }
 
@@ -421,8 +429,12 @@ public class JobDiscoveryService {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
             JobDiscoveryInfoSubjectHolder that = (JobDiscoveryInfoSubjectHolder) o;
             return Objects.equals(lookupKey, that.lookupKey);
         }
@@ -441,13 +453,13 @@ public class JobDiscoveryService {
 
 
     private int retryCount = 5;
-    private static JobDiscoveryService INSTANCE = null;
+    private static JobDiscoveryService instance;
 
     public static synchronized JobDiscoveryService getInstance(MantisClient mantisClient, Scheduler scheduler) {
-        if (INSTANCE == null) {
-            INSTANCE = new JobDiscoveryService(mantisClient, scheduler);
+        if (instance == null) {
+            instance = new JobDiscoveryService(mantisClient, scheduler);
         }
-        return INSTANCE;
+        return instance;
     }
 
     private JobDiscoveryService(final MantisClient mClient, Scheduler scheduler) {
@@ -489,7 +501,7 @@ public class JobDiscoveryService {
         Preconditions.checkNotNull(lookupKey, "lookup key cannot be null for fetching job discovery info");
         Preconditions.checkArgument(lookupKey.getId() != null && !lookupKey.getId().isEmpty(), "Lookup ID cannot be null or empty" + lookupKey);
         subjectMapSizeGauge.set(subjectMap.size());
-        return subjectMap.computeIfAbsent(lookupKey, (jc) -> new JobDiscoveryInfoSubjectHolder(mantisClient, jc, removeSubjectAction, this.retryCount, scheduler)).jobDiscoveryInfoStream();
+        return subjectMap.computeIfAbsent(lookupKey, jc -> new JobDiscoveryInfoSubjectHolder(mantisClient, jc, removeSubjectAction, this.retryCount, scheduler)).jobDiscoveryInfoStream();
     }
 
     /**
