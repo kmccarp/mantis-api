@@ -27,7 +27,7 @@ public class ConfigurationBasedAppStreamStore implements AppStreamStore {
 
   public ConfigurationBasedAppStreamStore(ConfigSource configSource) {
     configSource.getListenable()
-        .addListener((newConfig) -> updateAppJobClustersMapping(newConfig));
+        .addListener(this::updateAppJobClustersMapping);
     this.jsonSerializer = new JsonSerializer();
     updateAppJobClustersMapping(configSource.get());
 
@@ -49,7 +49,7 @@ public class ConfigurationBasedAppStreamStore implements AppStreamStore {
 
     if (appJobClustersMap != null) {
       final AppJobClustersMap appJobClusters;
-      if (appNames.size() > 0) {
+      if (!appNames.isEmpty()) {
         appJobClusters = appJobClustersMap.getFilteredAppJobClustersMap(new ArrayList<>(appNames));
       } else {
         appJobClusterMappingRequestCount.increment();

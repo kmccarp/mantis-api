@@ -20,9 +20,9 @@ import java.util.Objects;
 
 
 public class Artifact {
-    private long sizeInBytes;
-    private String fileName;
-    private byte[] content;
+    private final long sizeInBytes;
+    private final String fileName;
+    private final byte[] content;
 
     public Artifact(String fileName, long sizeInBytes, byte[] content) {
         Objects.requireNonNull(fileName, "File name cannot be null");
