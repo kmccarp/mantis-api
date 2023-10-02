@@ -40,15 +40,15 @@ public class Routes extends HttpInboundSyncFilter {
         String path = request.getPath();
         String host = request.getOriginalHost();
 
-        if (request.getMethod().toLowerCase().equals("options")) {
+        if ("options".equals(request.getMethod().toLowerCase())) {
             context.setEndpoint(Options.class.getCanonicalName());
-        } else if (path.equalsIgnoreCase("/healthcheck")) {
+        } else if ("/healthcheck".equalsIgnoreCase(path)) {
             context.setEndpoint(Healthcheck.class.getCanonicalName());
-        } else if (path.equalsIgnoreCase("/favicon.ico")) {
+        } else if ("/favicon.ico".equalsIgnoreCase(path)) {
             context.setEndpoint(Favicon.class.getCanonicalName());
         } else if (path.startsWith(Artifacts.PATH_SPEC)) {
             context.setEndpoint(Artifacts.class.getCanonicalName());
-        } else if (path.equalsIgnoreCase("/api/v1/mantis/publish/streamDiscovery")) {
+        } else if ("/api/v1/mantis/publish/streamDiscovery".equalsIgnoreCase(path)) {
             context.setEndpoint(AppStreamDiscovery.class.getCanonicalName());
         } else if (path.startsWith("/jobClusters/discoveryInfo")) {
             String jobCluster = request.getPath().replaceFirst(JobDiscoveryInfoCacheHitChecker.PATH_SPEC + "/", "");
@@ -56,7 +56,7 @@ public class Routes extends HttpInboundSyncFilter {
             request.setPath(newUrl);
             context.setEndpoint(ZuulEndPointRunner.PROXY_ENDPOINT_FILTER_NAME);
             context.setRouteVIP("api");
-        } else if (path.equalsIgnoreCase("/api/v1/mql/parse")) {
+        } else if ("/api/v1/mql/parse".equalsIgnoreCase(path)) {
             context.setEndpoint(MQLParser.class.getCanonicalName());
         } else if (path.equals(MREAppStreamToJobClusterMapping.PATH_SPEC)) {
             context.setEndpoint(MREAppStreamToJobClusterMapping.class.getCanonicalName());
