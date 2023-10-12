@@ -69,7 +69,9 @@ public class Bootstrap {
         }
         finally {
             // server shutdown
-            if (server != null) server.stop();
+            if (server != null) {
+                server.stop();
+            }
 
             System.exit(exitCode);
         }

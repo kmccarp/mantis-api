@@ -27,7 +27,7 @@ public class Artifacts extends HttpSyncEndpoint {
 
     @Override
     public boolean needsBodyBuffered(HttpRequestMessage input) {
-        return input.getMethod().toLowerCase().equals("post");
+        return "post".equals(input.getMethod().toLowerCase());
     }
 
     @Inject
@@ -41,7 +41,7 @@ public class Artifacts extends HttpSyncEndpoint {
     @Override
     public HttpResponseMessage apply(HttpRequestMessage request) {
 
-        if (request.getMethod().toLowerCase().equals("get")) {
+        if ("get".equals(request.getMethod().toLowerCase())) {
 
             String fileName = request.getPath().replaceFirst("^" + PATH_SPEC + "/?", "");
             if (Strings.isNullOrEmpty(fileName)) {
@@ -82,14 +82,13 @@ public class Artifacts extends HttpSyncEndpoint {
                 });
 
             }
-        } else if (request.getMethod().toLowerCase().equals("post")) {
+        } else if ("post".equals(request.getMethod().toLowerCase())) {
 
             byte[] body = request.getBody();
             artifactManager.putArtifact(new Artifact("testing.json", body.length, body));
 
-            HttpResponseMessage response = new HttpResponseMessageImpl(request.getContext(), request,
+            return new HttpResponseMessageImpl(request.getContext(), request,
                     HttpResponseStatus.OK.code());
-            return response;
 
         }
 
